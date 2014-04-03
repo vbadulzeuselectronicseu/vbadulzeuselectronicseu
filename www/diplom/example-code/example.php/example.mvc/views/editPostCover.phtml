@@ -1,0 +1,117 @@
+<script type="text/template" id="cover_template">
+    <div class="cover-parent">
+		<div class="text-box">
+			<?php echo $this->translate('To change the post cover, please, mark the photos which you would like to see on it.'); ?>
+		</div>
+
+		<div class="select-box">
+			<div class="hidden">
+				<a class="select-btn btn selectAll" href="javascript:;"></a>
+			</div>
+
+			<div class="images-carousel carousel">
+				<ul id="select-images-carousel"></ul>
+				<a href="#" class="next-btn" id="nextSelectImage"></a>
+				<a href="#" class="prev-btn" id="prevSelectImage"></a>
+				<div class="pagination styled-pagination" id="pagSelectImage" ></div>
+				<div class="clear"></div>
+			</div>
+		</div>
+
+		<div class="browser-item-container">
+            <div class="itemsOutPut" id="itemsOutPut" data-postid="">
+				<div class="result-carousel">
+					<div class="content resultContent">
+					</div>
+				</div>
+
+				<a href="#" class="prev-btn" id="resultPrevBtn" ></a>
+				<a href="#" class="next-btn" id="resultNextBtn"></a>
+				<div class="pagination styled-pagination" id="resultPag"></div>
+
+				<div class="edit-buttons">
+					<a href="#" onClick="voidSetSortableDraggable();" class="back-btn"><?php echo $this->translate('Back'); ?></a>
+					<a href="#" class="exit-btn"><?php echo $this->translate('Close'); ?></a>
+					<a href="#" class="apply-btn applyItemBtn">
+						<span class="apply-text"><?php echo $this->translate('Publish'); ?></span>
+					</a>
+					<div class="edit-buttons-wrap">
+						<div class="hasTooltip prev-zone-photo-btn areaBtn" title="<?php echo $this->translate('Set preview zone for your photos now'); ?>"></div>
+						<div class="order-photo-btn orderBtn hasTooltip" title="<?php echo $this->translate('Change the order of your photos'); ?>"></div>
+						<div class="flip-photo-btn flipItemsBtn hasTooltip" title="<?php echo $this->translate('Swap text and photos'); ?>"></div>
+					</div>
+					<div class="edit-buttons-hints">
+                        <span class="area"><?php echo $this->translate('Set preview zone for your photos now'); ?></span><br>
+                        <span class="order"><?php echo $this->translate('Change the order of your photos'); ?></span>
+					</div>
+				</div>
+			</div>
+        </div>
+    </div>
+</script>
+
+
+<script>
+//todo :: will relocate
+function voidSetSortableDraggable()
+{
+	App.tmp = undefined;
+}
+</script>
+
+<script type="text/template" id="items_template">
+<div class="editSlide">
+    <div class="browser-item-parent">
+        <div class="browser-item <%= iClassName %> editable " data-id="<%= iId %>">
+            <div class="item-header panel header-line">
+				<img src="<%= zendBaseUrl %>/images/hline.png"/>
+            </div>
+            <div class="content">
+                <ul class="images">
+                    <%= iImages %>
+                </ul>
+                <div class="text-container">
+                    <div class="text-inner">
+                        <%= iText %>
+                    </div>
+                </div>
+            </div>
+			<div class="footer-line">
+				<img src="<%= zendBaseUrl %>/images/fline.png"/>
+            </div>
+			<div class="selected-shadow"></div>
+			<!--<a href="#" class="apply-btn applyItemBtn"><span class="apply-text"><?php echo $this->translate('Apply'); ?></span><span class="applied-text"><?php echo $this->translate('Applied'); ?></span></a>-->
+			<!--<div class="post-edit-btns">
+				<span class="text">Изменить</span>
+				<a href="#" class="simple-btn mid-btn orderBtn">Очередность</a>
+				<a href="#" class="simple-btn mid-btn areaBtn">Область просмотра</a>
+			</div>-->
+        </div>
+    </div>
+</div>
+</script>
+
+<script type="text/template" id="flips_template">
+<div class="editSlide">
+    <div class="browser-item-parent">
+        <div class="flipItemsContainer">
+            <div class="flipItems">
+                <div class="firstFlip">
+                    <%= iFirstTemplate %>
+                </div>
+                <div class="secondFlip">
+                    <%= iSecondTemplate %>
+                </div>
+               <!-- <a href="#" class="flip-btn flipItemsBtn simple-btn mid-btn">Перевернуть</a>-->
+            </div>
+        </div>
+    </div>
+</div>
+</script>
+
+<script type="text/template" id="item_template">
+	<div class="parent-block">
+		<li><img data-id="<%= iImageId %>" src="<%= iImageSrc %>"/></li>
+	</div>
+</script>
+

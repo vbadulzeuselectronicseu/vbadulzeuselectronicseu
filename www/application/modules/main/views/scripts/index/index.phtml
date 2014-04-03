@@ -1,0 +1,125 @@
+<?php $this->headTitle('Welcome :: ' . $this->view['user']['username'] ); ?>
+<?php
+    // $this->headTitle('Главная страница ');
+    // $this->form->setAction($this->url());
+    // echo $this->form;
+    // for($i=0; $i<=1000; $i++):
+    // echo $this->message; ? 
+    // endfor;
+?>
+<!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-cloud"></span></a><!-- cloud -->
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/">Home</a></li>
+            <li><a onclick="routrer('about')">About</a></li>
+            <li><a onclick="routrer('contact')">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Show <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a onclick="routrer('myfiles')">My Files <span class="badge" style='background-color: #d9534f;'><?php echo($this->view['count']) ?></span> </a></li>
+
+                 
+                <!-- li><a onclick="routrer('mytext')">My Text <span class="badge">0</span></a></li -->
+                <!--  <li><a onclick="routrer('photo')">Photo</a></li>
+                <li><a onclick="routrer('tv')">TV</a></li> -->
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/index/logout"> log-out <span class=" glyphicon glyphicon-log-out "></span> </a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container"  id="id-page-container">
+        <div class="jumbotron"> 
+            <!-- -->
+            <!-- Large modal -->
+            <button class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg"><span class="glyphicon glyphicon-cloud-upload"></span> Upload</button>
+            <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content" style="width: 900px;">
+                        <div style="width: 20px;  height: 750px; padding-top: 50px; padding-left: 50px; color:#000">
+                        <p>Upload</p>
+                        
+                        <?php #echo $this->form ;?>
+ 
+                            <div class="well well-lg " style="width: 800px;">
+                                <form role="form" style="margin-left: 40px;" action="" method="post" enctype="multipart/form-data"  onsubmit="document.forms[0].but.disabled=true">
+                                    <div class="row">
+                                        <p>
+                                            <textarea class="form-control" name="description"  rows="4" cols="50" style='width: 702px;' placeholder="File description"></textarea> 
+                                        </p>
+                                        <p>
+                                            <input type="text" class="form-control" name="searchWords"  rows="4" cols="50" placeholder="Name" style="width: 702px;"/>
+                                        </p>
+                                        
+                                        <p>
+                                            <table>
+                                                <tr>
+                                                    <td><input style="height: 25px; width: 700px;padding: 0 0px;" name="userfile" type="file" />
+                                                    <p style="text-align: left"><h2 style="text-align: left" >location on maps</h2></p>
+
+                                                        <div style="width:700px; height:120px" id="mapMain"></div>
+
+                                                    </td>
+                                                    <!-- <td style="padding-left: 50px;">
+                                                        <div class="alert alert-warning">
+                                                                <p>
+                                                                    <input type="radio" name="access" value="0" style=" width: 20px;  height: 20px;" checked>public
+                                                                    <input type="radio" name="access" value="1" style=" width: 20px;  height: 20px;">private 
+                                                                </p>
+                                                        </div>
+                                                    </td> -->
+                                                </tr>
+                                                <tr>
+                                                <div class="alert alert-warning" style=" width: 700px;">
+                                                                <p>
+                                                                    <input type="radio" name="access" value="0" style=" width: 20px;  height: 20px;" checked>public
+                                                                    <input type="radio" name="access" value="1" style=" width: 20px;  height: 20px;">private 
+                                                                </p>
+                                                        </div>
+                                                </tr>
+                                                <tr>
+                                                    <td><button type="submit" class="btn btn-success" name='but'> <span class="glyphicon glyphicon-floppy-save"></span> Save </button></td>
+                                                </tr>
+                                            </table>
+                                        </p>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div> 
+            <!-- --> 
+        </div>
+    </div> <!-- /container -->
+    
+    <script defer="defer" type="text/javascript">
+    map = new OpenLayers.Map("mapMain");
+    map.addLayer(new OpenLayers.Layer.OSM());
+    var lonLat = new OpenLayers.LonLat( 30.523400000000038000 , 50.450100000000000000 )
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), /* transform from WGS 1984 */
+            map.getProjectionObject() /* to Spherical Mercator Projection */
+          ); 
+    var zoom=16; 
+    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    map.addLayer(markers); 
+    markers.addMarker(new OpenLayers.Marker(lonLat)); 
+    map.setCenter (lonLat, zoom);
+  </script>

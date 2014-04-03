@@ -1,0 +1,24 @@
+<div class="container"  id="id-page-container">
+    <div class="jumbotron"> 
+        <div style="width:1000px; height:500px" id="map"></div>
+  <script defer="defer" type="text/javascript">
+    map = new OpenLayers.Map("map");
+    map.addLayer(new OpenLayers.Layer.OSM());
+    var lonLat = new OpenLayers.LonLat( 30.523400000000038000 , 50.450100000000000000 )
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), /* transform from WGS 1984 */
+            map.getProjectionObject() /* to Spherical Mercator Projection */
+          );
+ 
+    var zoom=16;
+ 
+    var markers = new OpenLayers.Layer.Markers( "Markers" );
+    map.addLayer(markers);
+ 
+    markers.addMarker(new OpenLayers.Marker(lonLat));
+ 
+    map.setCenter (lonLat, zoom);
+  </script>
+    </div>
+</div>
+

@@ -1,0 +1,33 @@
+<?php $this->headTitle('Welcome'); ?>
+
+<div class="container" style='color:#000;'>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <?php echo $this->view['data']['cool_search_words']?>
+        </div>
+            <div class="panel-body">
+                <div class="row">
+                <?php if ( $this->view['data']['url'] ): ?>
+                    <div class="col-lg-7 col-md-7">
+                        <center>
+                            <img class="img-responsive" src="/DownloadFiles/<?php echo $this->view['data']['url']?>" width="250px" alt="" style="width:1250px;">
+                        </center>
+                    </div>
+                    <div class="col-lg-5 col-md-5"> 
+                        <div class="well well-lg">
+                            <p style="text-align: left; " ><?php echo $this->view['data']['file_description'];?></p>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <p style="text-align: left; " ><?php echo $this->view['data']['file_description'];?></p>
+                <?php endif;?> 
+            </div>
+                <br /> <hr />
+                <p>To share url   <span id='locationHrefUrl'></span> </p>
+                <script>
+                   document.getElementById('locationHrefUrl').innerHTML = '<span class="label label-success">' + location.href + "</span>";
+                </script>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,60 @@
+<?php $this->headTitle('Welcome to Valentin – the creator of a universal means of communication for friends and classmates who can enjoy every day tens of millions of people.'); ?>
+<script>
+    function mouseOverSignUp() {
+        document.getElementById("center").style.display="";
+    }
+    
+    function mouseOutSignUp() {
+        document.getElementById("center").style.display="none";
+    }
+</script>
+<h1><img src="/public/static/img/Valentin_logo.png"></h1>
+<!-- <h1>Welcome to <span class="glyphicon glyphicon-cloud"></span></h1> -->
+<?php echo $this->form ;?>
+<script>
+    document.getElementById('idError').innerHTML="<span>+</span>";
+</script>
+<script>
+    function joinButton(self) {
+        var inputMail = document.getElementById('inputMail').value;
+        var r = /^\w+@\w+\.\w{2,4}$/i;
+        var inputMailValue = r.test(document.getElementById('inputMail').value);
+        console.log( inputMailValue );
+        if ( inputMailValue ) {
+            joinPost({'inputMail': inputMail , 'json':'json' });
+           document.getElementById('joinInfo').innerHTML= '<p  id="joinInfo"> Your email have been sent for further instructions </p>';
+        } else {
+            self.disabled=false;
+        }
+    }
+</script>
+<div class="connect"></div>
+<div>
+    <button
+    data-toggle="modal" data-target=".bs-example-modal-lg"
+     type="button" class="btn btn-success" onmouseover="mouseOverSignUp()" >  <span class="glyphicon glyphicon-plus-sign"></span> Sign Up </button><br />
+    <center>
+        <div id='center' style="width: 300px; display:none"  onmouseover="mouseOverSignUp()"  onmouseout="mouseOutSignUp()">
+            <div class="well well-sm" style='width: 300px; color:#000; opacity:0.6; filter:alpha(opacity=60);'>
+                <p>By clicking Sign Up, you agree to our <a href="#" id='Terms' >Terms</a> </p>
+            </div>
+        </div>
+    </center>
+</div> 
+
+<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style='color:#000;'>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="width: 900px;">
+            <div style="width: 50px;  height: 350px; padding-top: 50px; padding-left: 50px; color:#000">
+                <div class="well well-lg " style="width: 800px;">
+                    <p>Sign Up </p>
+                    <input type="mail" class="form-control" id="inputMail" placeholder="E-mail">
+                     
+                    <button id='joinButton' type="button" class="btn btn-success" onClick="this.disabled=true; joinButton(this); ">  <span class="glyphicon glyphicon-plus-sign"></span> join </button><br />
+                    <hr />
+                    <p  id='joinInfo'>The password will be sent to Your E-mail</p>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>

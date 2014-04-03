@@ -1,0 +1,1263 @@
+<style>
+    /* #map {
+         cursor:url(sight.png),auto;
+     }*/
+</style>
+
+<script type="text/javascript">
+    /**
+     * string Shape
+     * @param object { myPhoto : 'string', alt : 'string', yo : 'string', flag : 'string'}
+     * @return string
+     */
+    function stringShape ( obj )
+    {
+        var shape = '<div class="user-info-map-bubble">'
+            +'<div class="user-info-block">'
+            +'<a href="javascript:;" class="user-info-pic">'
+            +'<img src="'+  obj.myPhoto +'" alt="' + obj.alt + '" class="user-3-userpic"></a>'
+            +'<a href="javascript:;" class="user-info-name">Poul Tabachnik</a>'
+            +'<span class="user-info-age">' + obj.yo + ' y.o.</span>'
+            +'<span class="user-info-gender m "></span>'
+            +'<span class="user-info-flag">'
+            +'<img src="' + obj.flag + '"></span>'
+            +'</div>'
+            +'</div>';
+        return shape.toString();
+    }
+
+    /**
+     * string stringViewPupap
+     * @param object
+     * @return string
+     */
+    function stringViewPupap( obj )
+    {
+        console.log(obj , userBlock );
+        if ( obj == undefined ) { var obj = {}; }
+        if ( !obj.about ) { obj.about = ''; }
+
+        var viewPupap = '<div id = "_popup" ';
+        viewPupap += ' class="user-block">';
+        viewPupap += '<div class="userpic">';
+
+        if(obj.photo != undefined ) {
+            viewPupap  += '<img src="'+zendBaseUrl+'/images/photos/albums/250x250/'+obj.photo+'" class="user-'+obj.id+'-userpic">';
+        }else{
+            viewPupap += '<img src="'+zendBaseUrl+'/images/userpic-default-'+obj.sex+'.jpg" class="user-'+obj.id+'-userpic">';
+        }
+        viewPupap += '<div class="user-info">'
+            +'<span class="gender is-user-'+obj.id+'-online '+obj.sex+'"></span>'
+
+        if ( obj.country_id != null ) {
+            viewPupap +='<img class="country-flag hasTooltip" src="'+zendBaseUrl+'/images/flags/'+obj.country_id+'.png">'
+        }
+
+        viewPupap +='</div>'
+            +'</div>'
+            +'<span class="offline-icon"></span>'
+            +'<span class="user-name dots">'+obj.lastName + obj.firstName+'</span>'
+            +'<span class="user-status dots">'
+            +'<span>'+obj.about+'</span>'
+            +'</span>';
+        return viewPupap.toString();
+    }
+
+</script>
+
+<script src="http://openlayers.org/api/OpenLayers.js"></script>
+<script src="http://www.openlayers.org/dev/OpenLayers.js"></script>
+<script src="http://acuriousanimal.com/code/animatedCluster/AnimatedCluster.js"></script>
+<script type="text/javascript">
+
+    function stringError ()
+    {
+        var shape = '<center style="padding-top: 100px;"><strong>Oh, and we have something broke, we trying to correct...</strong></center >';
+        $('#map').html(shape.toString());
+        return shape.toString();
+    }
+
+    function sleep ( ms ) {
+        ms += new Date().getTime();
+        while ( new Date() < ms ){}
+    }
+
+    function log ( object ) {
+        console.log('[var]>>>> ', object)
+        return '';
+    }
+
+    function random ( min, max )
+    {
+        return Math.random() * ( max - min ) + min;
+    }
+
+    /**
+     * voidPopupOffset
+     * @param  int zoom
+     * @return void
+     */
+
+    function voidPopupOffset( zoom , user ) {
+        console.log(zoom , user);
+        try{
+
+            var left_k = 0;
+            var top_k  = 0;
+
+            if (user){
+                if( zoom == 3 ) {
+                    left_k = 50;
+                    top_k  = 70;
+                }
+                
+                if( zoom == 18 ) {
+
+                    left_k = -30;
+                    top_k  = -40;
+                }
+
+                var left =  parseInt( document.getElementById('popup').style.left ) - 60 - (zoom * 5.5) - left_k;
+                var top  =  parseInt( document.getElementById('popup').style.top ) - 85 - (zoom * 12.5) - top_k;
+ 
+            } else {
+                if( zoom == 3 ) {
+                    left_k = 50;
+                    top_k  = 70;
+                }
+                 
+                if( zoom == 18 ) {
+
+                    left_k = -20;
+                    top_k  = 30;
+                }
+                var left =  parseInt( document.getElementById('popup').style.left ) - 60 - (zoom * 5.5) - left_k;
+                var top  =  parseInt( document.getElementById('popup').style.top ) - 115 - (zoom * 12.5) - top_k;
+            }
+            $('#popup')[0].style.left = left + 'px';
+            $('#popup')[0].style.top  = top + 'px';
+        }catch(e){
+            console.log('E_WARNING');
+        }
+    }
+
+    $(function() {
+        try {
+            init();
+        } catch( e ) {
+            stringError();
+            console.log("[65]> E_WARNING :: init Error");
+        }
+
+        $('.main-content').addClass('map-content');
+        $('#footer').addClass('map-footer');
+    });
+
+</script>
+
+<div class="user-map-wrap" >
+    <div id="map" style="width:100%; height:100%;"></div>
+</div>
+<!-- <div class="map-top-shadow-wrap">
+  <div class="map-top-shadow"></div>
+</div> -->
+<div class="user-map-menu-wrapper">
+    <div class="cat-outer">
+        <ul class="user-map-menu">
+            <li id='locationMe' ><a href="#" ><img src="<?php echo $this->baseUrl(), '/images/user-map-menu-me.png' ?>" class="hasTooltip" title="<?php echo $this->translate('Find myself on the map'); ?>"></a></li>
+            <li id='locationBgoToHome' ><a href="#"><img  click=" alert(7); "   src="<?php echo $this->baseUrl(), '/images/user-map-menu-home.png' ?>" class="hasTooltip" title="<?php echo $this->translate('Go to my default location'); ?>"></a></li>
+            <li id='locationBack'><a href="#"><img src="<?php echo $this->baseUrl(), '/images/user-map-menu-back.png' ?>" class="hasTooltip" title="<?php echo $this->translate('Go to my previous location'); ?>"></a></li>
+        </ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    /**
+     * Off Popup
+     * @param  void
+     * @return void
+     */
+    function voidRightOffPopup ()
+    {
+        try {
+            $( ".olPopupCloseBox" ).trigger( "click" );
+            $('#popup').remove();
+        } catch( e ) {
+            console.log("[99]> E_WARNING :: popap was not DELETE.");
+        }
+    }
+
+    /**
+     * Global Popup will all Delete ( Click )
+     * @param  void
+     * @return void
+     */
+    function voidPopupDelClick ()
+    {
+        console.log('will try delete');
+        $('#popup_contentDiv').on('mousemove', function(){
+            try {
+                voidRightOffPopup();
+                $('#popup').remove();
+            } catch( e ) {
+                console.log("[117]> E_WARNING :: popap was not DELETE.");
+            }
+        });
+    }
+
+    function init () {
+
+        /**
+         * global object with data
+         */
+
+        mapsArray = {
+            active : 0,
+            hoverHeroes  :  null, //where is the mouse?
+            //feature      :  [],
+            usersIdHeroes:  [], // user id and  Id Heroes ....
+            users        :  <?php echo $this->users; ?>,  // herois   //
+            usersIdPopup :  <?php echo (!empty($this->usersIdPopup) ) ? $this->usersIdPopup : "{}"; ?>,  // popup    //
+
+            users2        : zendBaseUrl + '/images/maps/2.png',
+            users3        : zendBaseUrl + '/images/maps/3.png',
+            users4        : zendBaseUrl + '/images/maps/4.png',
+            users10       : zendBaseUrl + '/images/maps/10-99.png',
+            users100      : zendBaseUrl + '/images/maps/100-999.png',
+            users1000     : zendBaseUrl + '/images/maps/1000-9999.png',
+            users10000    : zendBaseUrl + '/images/maps/10000-999999.png',
+            usersInfinite : zendBaseUrl + '/images/maps/10000-999999.png',
+
+            config       :  {
+                epsg4326   : new OpenLayers.Projection('EPSG:4326'),
+                epsg900913 : new OpenLayers.Projection('EPSG:900913'),
+                minZoomLevel: 19,
+                zoom       : 12 // values ​​when the program starts
+            },
+            mySelfHero : {
+                mySelfHeroId : null, // my self imeg id
+                mySelfPost   : <?php echo (!empty($this->mySelfPost) ) ? $this->mySelfPost : "{}"; ?>,
+                visitorHero  : null,
+                movingMySelfHero : false, // true = "Active", false  = "passive"
+                lonHome : ( App.visitor.id !== undefined ) ? App.visitor.get( 'defaultLatLon' ).lon : <?php echo $this->lonHome ? $this->lonHome : 0 ?>,     // my home lacation
+                latHome : ( App.visitor.id !== undefined ) ? App.visitor.get( 'defaultLatLon' ).lat : <?php echo $this->latHome ? $this->latHome : 0 ?>,     // my home lacation
+
+                lon   :  ( App.visitor.id !== undefined ) ? <?php echo $this->lon ? $this->lon : 0 ?> : <?php echo $this->lonHome ? $this->lonHome : 0 ?>,
+                lat   :  ( App.visitor.id !== undefined ) ? <?php echo $this->lat ? $this->lat : 0 ?> : <?php echo $this->latHome ? $this->latHome : 0 ?>,    // my lacation
+
+                icon  : "<?php echo $this->icon; ?>?theMySelfHeroIconId",
+                story : [],
+                zoom  : 12 // zoom which is now ( 7 by default Hold down the "Me" ) // The value changes during the program
+            },
+            popup : {
+                sleep : 9, // mc sleep
+                setTimeout : false, // use
+                //onOrOff : null,     // will use
+                triger  : {
+                    heroes : false,
+                    popup  : false
+                }
+            },
+            zIndex : 99999, // not using
+            controlDragMapPoint : {
+                x : null,
+                y : null,
+                feature: null
+            },
+            //graphicHeight : 61,
+            graphicHeight  : 55,
+            graphicHeightMax: 200
+        };
+
+        /**
+         * start
+         */
+        $(function() {
+
+            try {
+                var map  = initMap();
+            } catch( e ) {
+                stringError(); console.log("[192]> E_ERROR :: initMap");
+            }
+
+            try {
+                var vectorOther = initOther(map);
+            } catch( e ) {
+                stringError(); console.log("[202]> E_ERROR :: initOther");
+            }
+
+            try {
+                var vectorMy = initMy(map);
+            } catch( e ) {
+                stringError(); console.log("[220]> E_ERROR :: initMy");
+            }
+
+            try {
+                var controlSelect = controlSelectMaps(vectorOther, vectorMy, map);
+            } catch( e ) {
+                stringError(); console.log("[228]> E_ERROR :: controlSelectMaps");
+            }
+
+            try {
+                map.addControl(controlSelect);
+            } catch( e ) {
+                stringError(); console.log("[235]> E_ERROR :: addControl");
+            }
+
+            try {
+                var controlDrag = controlDragMap(vectorMy, map);
+            } catch( e ) {
+                stringError(); console.log("[235]> E_ERROR :: controlDragMap");
+            }
+
+            try {
+                map.addControl(controlDrag);
+            } catch( e ) {
+                stringError(); console.log("[235]> E_ERROR :: map.addControl(controlDrag)");
+            }
+
+            try {
+                addToByDefaultStory();
+            } catch( e ) {
+                stringError(); console.log("[235]> E_ERROR :: addToByDefaultStory()");
+            }
+
+            try {
+                setCenter(map);
+            } catch( e ) {
+                stringError(); console.log("[235]> E_ERROR :: setCenter(map)");
+            }
+
+            // controlDrag.layer.div.nextElementSibling.style.zIndex  = mapsArray.zIndex;
+        });
+
+        function photoTemplateModul ( _laltPost ) {
+            if ( ! _laltPost.length ) return;
+            var template = "<img src=\"" + zendBaseUrl + "/images/photos/albums/250x250/" +_laltPost + "\" />";
+            return template;
+        }
+
+        /**
+         * set point map
+         * @param  object map
+         * @return object map
+         */
+        function setPoint ( map ) {
+            var point = new OpenLayers.LonLat( mapsArray.mySelfHero.lon, mapsArray.mySelfHero.lat );
+            point.transform( new OpenLayers.Projection('EPSG:4326'),  map.getProjectionObject()   );
+            return point;
+        }
+
+        /**
+         * set Center map
+         * @param object map
+         * @return void
+         */
+        function setCenter ( map ) {
+            var point = setPoint( map );
+            map.setCenter( point );
+        }
+
+        function log ( caption, object ) {
+            console.log( 'ooo ', caption, object );
+            return '';
+        }
+
+        /**
+         * @param object vectorMy
+         * @return object controlDrag
+         */
+        function controlDragMap ( vectorMy, map ) {
+
+            var allowedToLocatinot = false;
+
+            var controlDrag = new OpenLayers.Control.DragFeature(vectorMy, {
+                autoActivate: true,
+
+                clickFeature: function ( feature ) {
+
+                    if ( +App.me !== undefined ) {
+                        if ( mapsArray.mySelfHero.mySelfPost[0] === undefined ) {
+                            window.location.href =  zendBaseUrl  + "/main/index/id/" + App.me;
+                        } else {
+                            window.location.href =  zendBaseUrl  + "/blog/index/id/" + mapsArray.mySelfHero.mySelfPost[0].id;
+                        }
+                    }
+                    //console.log("clickFeature");
+                },
+                clickoutFeature: function ( feature ) {
+                    //console.log("clickoutFeature");
+                },
+                featurehighlighted: function ( vector ) {
+                    //console.log('featurehighlighted');
+                },
+                onComplete: function ( vector ) {
+                    //console.log('onComplete');
+
+                    var _point = new OpenLayers.Geometry.Point(vector.geometry.x,vector.geometry.y );
+                    _point.transform( map.getProjectionObject(), new OpenLayers.Projection('EPSG:4326') );
+                    addlonLat = [ _point.x, _point.y ];
+
+                    mapsArray.mySelfHero.lon = _point.x;
+                    mapsArray.mySelfHero.lat = _point.y;
+
+                    mapsArray.mySelfHero.story.push( addlonLat );
+                    // console.log( mapsArray.mySelfHero.lon,  mapsArray.mySelfHero.lat  )
+                    saveHero();
+                },
+                onDrag: function ( e ) {
+
+                    var _point =  new OpenLayers.Geometry.Point( e.geometry.x,  e.geometry.y );
+                    _point.transform( map.getProjectionObject(), new OpenLayers.Projection('EPSG:4326') );
+
+                    mapsArray.controlDragMapPoint.x = _point.x;
+                    mapsArray.controlDragMapPoint.y = _point.y;
+
+                    mapsArray.popup.triger.heroes = false;
+                    mapsArray.popup.triger.popup  = false;
+
+                    feature = mapsArray.controlDragMapPoint.feature;
+
+                    try {
+                        voidRightOffPopup();
+
+                        // ********* old begin **************
+                        // clearTimeout(feature.popupClosing);
+                        // feature.popupClosing = null;
+                        // map.removePopup(feature.popup);
+                        // feature.popup.destroy();
+                        // feature.popup = null;
+                        // mapsArray.popup.setTimeout = false;
+                        // feature.popupClosing = null;
+                        // ********* old end ****************
+
+                    } catch( e ) {
+                        console.log('[243]> E_WARNING :: popap was incorrect delete');
+                    }
+                },
+
+                onLeave: function ( e ) {
+                    mapsArray.hoverHeroes = null;
+                    //console.log("onLeave");
+                },
+
+                onEnter: function ( e ) {
+                    mapsArray.hoverHeroes = parseInt( App.visitor.get('id') );
+                    //console.log("onEnter");
+                }
+            });
+            return controlDrag;
+        }
+
+        /**
+         * save Hero save lon && lat
+         * @param  void
+         * @return void
+         */
+        function saveHero () {
+
+            $.post(zendBaseUrl + '/index/ajax-maps', {    // save lon && lat
+                format: 'json',
+                lon   :  mapsArray.mySelfHero.lon,
+                lat   :  mapsArray.mySelfHero.lat
+            }, function( data ) {
+                // todo :: if  return
+            });
+        }
+
+        /**
+         * map selector Maps
+         * @param  object map
+         * @param  object vector
+         * @return object selector
+         */
+
+        function controlSelectMaps ( vectorOther, vectorMy, map) {
+
+            var controlSelect = new OpenLayers.Control.SelectFeature([vectorOther, vectorMy], {
+                autoActivate: true,
+                hover:        true,
+
+                callbacks: {
+                    click: function( event ) {
+                        //console.log("[event]",event);
+                        if ( event.attributes.count == 1 ) {
+
+                            var _userId = event.cluster[0].attributes.userId;
+                            if ( mapsArray.usersIdPopup[_userId][0] !== undefined ) {
+                                window.location.href = zendBaseUrl + "/blog/index/id/" + mapsArray.usersIdPopup[_userId][0].id;
+                            } else {// default
+                                window.location.href = zendBaseUrl + "/main/index/id/" + event.cluster[0].attributes.userId;
+                            }
+                        }
+                    },
+
+                    dblclick: function( event ) {
+                        if (map.zoom < mapsArray.config.minZoomLevel){
+                            map.zoomTo(map.zoom + 1);
+                        }
+                    }
+                }
+            });
+            return controlSelect;
+        }
+
+        /**
+         * @param  void
+         * @return void
+         */
+        function  addToByDefaultStory () {
+
+            if(  +App.visitor.get('id') ) {
+                var iLon = <?php echo $this->lon ? $this->lon : 0 ?> ? <?php echo $this->lon ? $this->lon : 0 ?> : App.visitor.get( 'defaultLatLon' ).lon;
+            } else {
+                var iLon =  0;
+            }
+
+            if( +App.visitor.get('id') ) {
+                var iLat =  <?php echo $this->lon ? $this->lat : 0 ?> ? <?php echo $this->lat ? $this->lat : 0 ?> : App.visitor.get( 'defaultLatLon' ).lat;
+            } else {
+                var iLat =  0;
+            }
+            mapsArray.mySelfHero.story.unshift([iLon,iLat]);
+        }
+
+        /**
+         * @param  void
+         * @return void
+         */
+        function saveHero () {
+
+            $.post(zendBaseUrl + '/index/ajax-maps', {    // save lon && lat
+                format: 'json',
+                lon   :  mapsArray.mySelfHero.lon,
+                lat   :  mapsArray.mySelfHero.lat
+            }, function( data ) {
+
+                mapsArray.mySelfHero.lon = data.result.lon;
+                mapsArray.mySelfHero.lat = data.result.lat;
+
+                // todo :: if  return
+                // alert(3);
+            });
+
+        }
+
+        function getFeatures ( map ) {
+
+            var features = [];
+            for( var i=0; i < mapsArray.users.length; i++ ) {
+                if ( +App.me != mapsArray.users[i].id ) {
+
+                    if ( ( mapsArray.users[i].lon != 0 ) || ( mapsArray.users[i].lat != 0 ) ) {
+
+                        var ranLon = function () {
+                            var  min = 0.0001
+                            var  max = 0.01
+
+                            var  ret = parseFloat( mapsArray.users[i].lon ) + ( Math.random() * ( max - min ) + min );
+                            return parseFloat( ret );
+                        }
+
+                        var ranLat = function () {
+                            var  min = 0.0001
+                            var  max = 0.01
+
+                            var  ret = parseFloat( mapsArray.users[i].lat ) + ( Math.random() * ( max - min ) + min );
+                            return parseFloat( ret );
+                        }
+
+                        var feature = new OpenLayers.Feature.Vector(
+                        new OpenLayers.Geometry.Point( ranLon(), ranLat() ).transform( new OpenLayers.Projection('EPSG:4326'),  map.getProjectionObject() ),
+                        {
+                            count: 1,
+                            icon : zendBaseUrl + '/images/heroes/400/' + mapsArray.users[i].filename + '?id=' + mapsArray.users[i].id,
+                            userId : mapsArray.users[i].id,
+                            label: '' // todo :: how to remove it!
+                        }
+                    );
+
+                        mapsArray.usersIdHeroes.push( [mapsArray.users[i].id, feature.id] );
+                        features.push( feature );
+
+                    }
+                }
+            }
+
+            // fake users
+            var projLonLat   = new OpenLayers.Projection('EPSG:4326');
+            var projMercator = map.getProjectionObject();
+            function random(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+            for(var i=1; i<10000; i++) {
+                var feature = new OpenLayers.Feature.Vector(
+                new OpenLayers.Geometry.Point(random(1,340)-170, random(1,160)-80).transform(projLonLat, projMercator, 8),
+                {
+                    count: 1,
+                    icon : zendBaseUrl + '/images/heroes/400/w36.png?id=1',
+                    userId : 1,
+                    label: ''
+                }
+            );
+                features.push(feature);
+            }
+
+            return features;
+        }
+
+        function markerHero ( map, mapsMySelfHeroLon, mapsMySelfHeroLat ) {
+
+            if( ( mapsMySelfHeroLon === undefined ) || ( mapsMySelfHeroLat  === undefined ) ) {
+                var  mapsMySelfHeroLon = mapsArray.mySelfHero.lon;
+                var  mapsMySelfHeroLat = mapsArray.mySelfHero.lat;
+            }
+
+            var point      = new OpenLayers.Geometry.Point(mapsMySelfHeroLon, mapsMySelfHeroLat);
+            point.transform( new OpenLayers.Projection('EPSG:4326'), map.getProjectionObject() ) ;
+            var features = [
+                new OpenLayers.Feature.Vector(
+                point,
+                {
+                    // fontOpacity: 1,
+                    // fillOpacity: 1,
+                    // fillOpacity  : 1,
+                    // strokeOpacity :1,
+                    count: 1,
+                    icon: mapsArray.mySelfHero.icon,
+                    //myselfId:
+                    label: ''//'It`s me!'
+                }
+            )
+            ];
+            mapsArray.mySelfHero.visitorHero = features;
+            mapsArray.mySelfHero.visitorHero[0].move( point );
+
+            mapsArray.mySelfHero.mySelfHeroId = point.id; // my self id
+            return features;
+        }
+
+        /**
+         * here is working with my hero
+         * @param  void
+         * @return object map
+         */
+
+        function initMap () {
+            var map = new OpenLayers.Map({
+                div: 'map',
+                controls: [
+                    new OpenLayers.Control.Navigation(),    // direct panning via mouse drag
+                    new OpenLayers.Control.PanZoomBar()     // larger navigation control
+                ],
+
+                layers: [
+
+                    new OpenLayers.Layer.OSM(
+                    'OpenStreetMap',
+                    'http://tile.openstreetmap.org/${z}/${x}/${y}.png',
+                    //'http://api06.dev.openstreetmap.org/${z}/${x}/${y}.png', // url for test purpose
+                    /*
+                    [
+                        "http://otile1.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png",
+                        "http://otile2.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png",
+                        "http://otile3.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png",
+                        "http://otile4.mqcdn.com/tiles/1.0.0/osm/${z}/${x}/${y}.png"
+                    ],
+                     */
+                    {
+                        transitionEffect: 'resize',
+                        tileOptions: {crossOriginKeyword: null},
+                        numZoomLevels: mapsArray.config.minZoomLevel,
+                        minZoomLevel: mapsArray.config.minZoomLevel
+                    }
+                )
+                ],
+                center: [0, 0],
+                zoom  : mapsArray.config.zoom
+            });
+
+            map.events.register('zoomstart', map, function ( e ) {
+                //console.log('zoomstart', map.zoom, ' -=>| ', e.zoom);
+
+                // deactivate clustering on the max map scale
+                var vectorOther = map.getLayersByName('vectorOther')[0];
+                var minClusteringZoom = mapsArray.config.minZoomLevel - 1;
+
+                if((map.zoom < minClusteringZoom) && (minClusteringZoom <= e.zoom)) {
+                    vectorOther.strategies[0].distance = 1; // if you try to deactivate then animatedCluster loses all features
+                    //console.log('clustering OFF', vectorOther );
+                }
+
+                if((map.zoom >= minClusteringZoom) && (minClusteringZoom > e.zoom)) {
+                    vectorOther.strategies[0].distance = 200;
+                    //console.log('clustering ON', vectorOther );
+                }
+            });
+
+            map.events.register('zoomend', map, function ( e ) {
+                //console.log('zoomend', mapsArray.mySelfHero.zoom, ' |-=> ', map.zoom);
+
+                mapsArray.mySelfHero.zoom = map.zoom;
+
+                voidRightOffPopup();
+                voidPopupOffset( map.zoom , mapsArray.active );
+            });
+
+            // console.log('map', map);
+            return map;
+        }
+
+        function initOther ( map ) {
+
+            var userIdTemp = null; // temp variable
+
+            function popupTimeout( feature, map, evt, timeout ) {
+
+                if ( mapsArray.popup.triger.heroes == true && mapsArray.popup.triger.popup == true ) return;
+
+                clearTimeout(feature.popupClosingOther);
+                feature.popupClosingOther = setTimeout( function () {
+
+                    if ( mapsArray.popup.triger.heroes == false && mapsArray.popup.triger.popup == false ) {
+                        console.log('popupTimeout() - setTimeout - just will begin to remove');
+
+                        try {
+                            voidRightOffPopup(); // [Availability] :: will try protect ourselves from the delay of data from the server, provided that the cursor is moved to the another hero
+                        } catch( e ) {
+                            console.log("[584]> E_WARNING :: [Availability Error] ::  popap was not DELETE.");
+                        }
+
+                        var feature = evt.feature;
+                        if( feature.attributes.count > 1 ) return;
+                        feature = feature.cluster[0];
+                        if( !feature.popup ) return;
+
+                        try{
+
+                            map.removePopup(feature.popup);
+                            feature.popup.destroy();
+                            feature.popup = null;
+                            voidRightOffPopup();
+                            //console.log("All ok DELETE");
+
+                        } catch( e ) {
+                            console.log("[418]> E_WARNING :: popap was not created because there is nothing to remove.");
+                        }
+
+                    } else {
+                        console.log("NOT DELETE");
+                    }
+
+                }, timeout );
+            }
+
+            function popupDeleteTimeout ( feature, map, evt ) {
+                clearTimeout(feature.popupClosingOther);
+
+                var feature = evt.feature;
+                if ( feature.attributes.count > 1 ) return;
+                feature = feature.cluster[0];
+                if ( !feature.popup ) return;
+
+                try {
+                    map.removePopup(feature.popup);
+                    feature.popup.destroy();
+                    feature.popup = null;
+
+                    voidRightOffPopup();
+                } catch( e ) {
+                    console.log("[436]> E_WARNING :: popap was not created because there is nothing to remove.");
+                }
+
+            }
+
+            var styleOther = new OpenLayers.StyleMap({
+                'default':   new OpenLayers.Style(
+                {
+                    externalGraphic: '${icon}',
+                    label:  '${label}',
+                    fontSize: '${getFontSize}',
+                    graphicHeight: '${getIconSize}',
+                    graphicYOffset: '${getOffset}',
+                    cursor: 'pointer'
+                }, {
+                    context: {
+                        getFontSize: function ( feature ) {
+                            var size = map.getZoom() * map.getZoom() / 5;
+                            var min = mapsArray.graphicHeight / 4, max = mapsArray.graphicHeightMax / 5;
+                            if(size < min){
+                                size = min;
+                            }
+                            if(size > max){
+                                size = max;
+                            }
+                            //console.log('getFontSize', size);
+                            return size;
+                        },
+                        getIconSize: function ( feature ) {
+                            var size = map.getZoom() * map.getZoom();
+                            if(size < mapsArray.graphicHeight){
+                                size = mapsArray.graphicHeight;
+                            }
+                            if(size > mapsArray.graphicHeightMax){
+                                size = mapsArray.graphicHeightMax;
+                            }
+                            //console.log('getIconSize', size);
+                            return size;
+                        },
+                        getOffset: function ( feature ) {
+                            var size = -( map.getZoom() * map.getZoom() / 1.18 );
+                            var min = -(mapsArray.graphicHeight / 1.2), max = -(mapsArray.graphicHeightMax / 1.18);
+                            if(size > min){
+                                size = min;
+                            }
+                            if(size < max){
+                                size = max;
+                            }
+                            //console.log('getOffset', size);
+                            return size;
+                            //return privateZoome;
+                        },
+                        icon: function ( feature ) {
+                            if ( feature.cluster.length > 1 ) {
+
+                                if ( feature.cluster.length <= 2 ) {
+                                    return mapsArray.users2;
+                                } else if ( feature.cluster.length  <= 3     ) {
+                                    return mapsArray.users3;
+                                } else if ( feature.cluster.length  <= 4     ) {
+                                    return mapsArray.users4;
+                                } else if ( feature.cluster.length  <= 10    ) {
+                                    return mapsArray.users10;
+                                } else if ( feature.cluster.length  <= 100   ) {
+                                    return mapsArray.users100;
+                                } else if ( feature.cluster.length  <= 1000  ) {
+                                    return mapsArray.users1000;
+                                } else if ( feature.cluster.length  <= 10000 ) {
+                                    return mapsArray.users10000;
+                                } else {
+                                    return mapsArray.usersInfinite;
+                                }
+
+                            } else {
+                                return feature.cluster[0].attributes.icon;
+                            }
+                        },
+                        label: function ( feature ) {
+                            if ( feature.cluster.length > 1 ) {
+                                return feature.attributes.count;
+                            } else {
+                                return feature.cluster[0].attributes.label;
+                            }
+                        }
+                    }
+                }
+            )
+            });
+
+            styleOther.styles.select.defaultStyle.fillOpacity = 1.0; // Opacity global
+
+            var vector = new OpenLayers.Layer.Vector('vectorOther', {
+
+                strategies: [
+                    new OpenLayers.Strategy.AnimatedCluster({
+                        distance: mapsArray.graphicHeightMax,// * 2.3
+                        animationMethod: OpenLayers.Easing.Expo.easeOut,
+                        animationDuration: 10
+                    })
+                ],
+
+                styleMap: styleOther,
+
+                eventListeners: {
+
+                    featureselected: function ( evt ) {
+                        voidPopupDelClick();
+                        // _.each(mapsArray.feature, function(features){
+                        // });
+                        //console.log("[1]>> featureselected");
+                        mapsArray.popup.triger.heroes = true;
+
+                        var feature = evt.feature;
+
+                        mapsArray.hoverHeroes = null;
+                        mapsArray.hoverHeroes = parseInt(feature.cluster[0].attributes.userId);
+
+                        //console.log(feature.cluster[0].attributes.userId);
+
+                        if ( feature.attributes.count > 1 ) {
+                            voidRightOffPopup();
+                            return;
+                        }
+
+                        feature = feature.cluster[0];
+
+                        if ( feature.popup ) return;
+
+                        var _userId = feature.attributes.icon.split('\?id\=')[1];
+
+                        userIdTemp = _userId;// will deleted
+
+                        function popupFramedCloud () {
+
+                            feature.popup = new OpenLayers.Popup('popup',
+                            OpenLayers.LonLat.fromString(feature.geometry.toShortString()),
+                            null,
+                            '<div class="feature_id_'+ feature.id +'  feature_id_will_delete frameSizeMaps">'+ laltPost +'</div>', // laltPost // stringViewPupap( test )
+                            null,
+                            true
+                        );
+
+                            try {
+                                voidRightOffPopup();
+
+                                sleep( mapsArray.popup.sleep );
+                                map.addPopup( feature.popup );
+                            } catch( e ) {
+                                console.log("[546]> E_WARNING :: popap was not created.");
+                            }
+
+                            // todo :: will remake ?
+                            $('#popup_FrameDecorationDiv_4, #popup_FrameDecorationDiv_3, #popup_FrameDecorationDiv_2, popup_FrameDecorationDiv_1').on('mousemove', function() {
+                                console.log('popup mousemove');
+                                mapsArray.popup.triger.popup = true;
+                            });
+
+                            $('#popup_FrameDecorationDiv_4, #popup_FrameDecorationDiv_3, #popup_FrameDecorationDiv_2, popup_FrameDecorationDiv_1').on('mouseout', function() {
+                                mapsArray.popup.triger.popup = false;
+                                var feature = evt.feature;
+
+                                console.log('popup mouseout');
+                                popupTimeout( feature, map, evt, 50 );
+                            });
+
+                            voidPopupOffset( mapsArray.mySelfHero.zoom , 0 );
+
+                            return true;
+                        }
+
+                        if ( mapsArray.usersIdPopup[_userId][0] !== undefined ){
+
+                            var __x = new Post({ post: mapsArray.usersIdPopup[_userId][0].post, author:mapsArray.usersIdPopup[_userId][0].author }).prepare();
+
+                            var postPreview = new PostSmallPreviewView({
+                                model:  __x, //  Model LentВ  transmit  here
+                                parent: $('feature_id_' + feature.id)
+                            }).render();
+
+                            var laltPost = postPreview.$el[0].outerHTML;
+
+                            if( parseInt( mapsArray.usersIdPopup[_userId][0].author.id ) == parseInt( mapsArray.hoverHeroes ) ) {
+                                popupFramedCloud();
+                            } else {
+                                voidRightOffPopup();
+                            }
+
+                        } else {
+
+                            var __userId = parseInt( _userId );
+
+                            $.post(  zendBaseUrl + '/index/ajax-maps-is-no-post', { 'userId' : __userId, 'format' : 'json' }, function( data ) {
+
+                                _laltPost = $.parseJSON(data.result).info.value;
+                                var key   = $.parseJSON(data.result).info.key;
+
+                                if ( 'photo' == $.trim(key) ) {
+                                    laltPost = photoTemplateModul( _laltPost );
+                                } else {
+                                    laltPost = _laltPost;
+                                }
+
+                                if (
+                                ( mapsArray.popup.triger.heroes == true  &&  mapsArray.popup.triger.popup == false ) ||
+                                    ( mapsArray.popup.triger.heroes == false &&  mapsArray.popup.triger.popup == true  ) ||
+                                    ( mapsArray.popup.triger.heroes == true  &&  mapsArray.popup.triger.popup == false )
+                            ) {
+                                    // console.log( parseInt($.parseJSON(data.result).id), mapsArray.hoverHeroes );
+
+                                    if ( ( parseInt($.parseJSON(data.result).id) == mapsArray.hoverHeroes ) ) {
+
+                                        voidRightOffPopup();
+                                        function voidPopupFramedCloud() {
+
+                                            laltPost =  stringViewPupap( $.parseJSON(data.result).info );
+
+                                            popupFramedCloud();
+                                        }
+
+                                        setTimeout(voidPopupFramedCloud, 100);
+                                        // voidPopupDelClick();
+                                        // popupFramedCloud();
+                                    } else {
+                                        voidRightOffPopup();
+                                    }
+                                }
+                            });
+                        }
+                    },
+
+                    featureunselected: function ( evt ) {
+                        voidPopupDelClick();
+                        mapsArray.hoverHeroes == null;
+                        mapsArray.popup.triger.heroes = false;
+                        var feature = evt.feature;
+
+                        console.log('featureunselected - popupTimeout');
+                        popupTimeout( feature, map, evt, 50 );
+                    }
+                },
+            });
+            var features = getFeatures(map);
+
+            // _.each(features, function(features){
+            //     console.log(features.id);
+            // });
+
+            map.addLayer(vector);
+            vector.addFeatures(features);
+
+            return vector;
+        }
+
+        function initMy ( map ) {
+
+            var  mapsMySelfHeroLon = mapsArray.mySelfHero.lon;
+            var  mapsMySelfHeroLat = mapsArray.mySelfHero.lat;
+
+            if ( ( mapsArray.mySelfHero.lon === 0 ) && ( mapsArray.mySelfHero.lat === 0 ) ) {
+                var mapsMySelfHeroLon = mapsArray.mySelfHero.lonHome;
+                var mapsMySelfHeroLat = mapsArray.mySelfHero.latHome;
+            }
+
+            function popupStartClosing ( feature ) {
+
+                popupStopClosing(feature);
+
+                if ( mapsArray.popup.triger.heroes == true && mapsArray.popup.triger.popup == true ) return;
+
+                feature.popupClosing = setTimeout( function () {
+                    if ( mapsArray.popup.triger.heroes == false && mapsArray.popup.triger.popup == false ) {
+                        console.log("self Begin DELETE");
+
+                        try {
+                            voidRightOffPopup(); // [Availability] :: will try protect ourselves from the delay of data from the server, provided that the cursor is moved to the another hero
+                        } catch( e ) {
+                            console.log("[584]> E_WARNING :: [Availability Error] ::  popap was not DELETE.");
+                        }
+
+                        try {
+                            map.removePopup(feature.popup);
+                            feature.popup.destroy();
+                            feature.popup = null;
+                            mapsArray.popup.setTimeout = false;
+                            feature.popupClosing = null;
+                        } catch( e ) {
+                            console.log("[823]> E_WARNING :: [Availability Error] ::  popap was not DELETE.");
+                        }
+
+                    } else {
+                        console.log('NOT DELETE');
+                    }
+                },25);
+            }
+
+            function popupStopClosing ( feature ) {
+
+                //if(feature.popupClosing){
+                clearTimeout(feature.popupClosing);
+                feature.popupClosing = null;
+                //}
+            }
+
+            function popupFramedCloudSelf ( feature, laltPost, evt ) {
+                feature.popup = new OpenLayers.Popup('popup',
+                // feature.popup = new OpenLayers.Popup.FramedCloud('popup',
+                OpenLayers.LonLat.fromString(feature.geometry.toShortString()),
+                null,
+                '<div class="feature_id_'+ feature.id +' frameSizeMaps">'+ laltPost +'</div>', //
+                null,
+                true
+            );
+
+                sleep( mapsArray.popup.sleep );
+                map.addPopup(feature.popup);
+
+                $('#popup_FrameDecorationDiv_4, #popup_FrameDecorationDiv_3, #popup_FrameDecorationDiv_2, #popup_FrameDecorationDiv_1 ').on(' mousemove ',function(){
+                    mapsArray.popup.triger.popup = true;
+                    popupStopClosing(feature);
+                });
+
+                $('#popup_FrameDecorationDiv_4, #popup_FrameDecorationDiv_3, #popup_FrameDecorationDiv_2, #popup_FrameDecorationDiv_1 ').on('mouseout',function(){
+                    mapsArray.popup.triger.popup = false;
+                    var feature = evt.feature;
+                    if ( !feature.popup ) return;
+                    popupStartClosing(feature);
+                });
+
+                voidPopupOffset(mapsArray.mySelfHero.zoom , 1 );
+            }
+
+            var styleMy = new OpenLayers.StyleMap({
+                'default': new OpenLayers.Style(
+                {
+                    externalGraphic: '${icon}',
+                    //graphicHeight:  mapsArray.graphicHeight,
+                    //graphicHeight :  mapsArray.graphicHeight,
+                    graphicHeight : '${getSize}',
+                    // graphicYOffset:  0,
+                    // graphicXOffset:  0,
+                    // fontOpacity: 1,
+                    fillOpacity: 1,
+                    label: '${label}',
+                    cursor: 'pointer'
+                }, {
+                    context: {
+                        getSize: function ( feature ) {
+                            var result = map.getZoom() * map.getZoom();
+                            if(result < mapsArray.graphicHeight){
+                                result = mapsArray.graphicHeight;
+                            }
+                            if(result > mapsArray.graphicHeightMax){
+                                result = mapsArray.graphicHeightMax;
+                            }
+                            //console.log('getSize', result)
+                            return result;
+                        },
+                    }
+                }
+            )
+            });
+
+            var vector = new OpenLayers.Layer.Vector('vectorMy', {
+                styleMap: styleMy,
+
+                eventListeners: {
+                    featureselected: function ( evt ) {
+                        voidPopupDelClick();
+                        mapsArray.active = 1;
+                        mapsArray.popup.triger.heroes = true;
+                        var feature = evt.feature;
+
+                        mapsArray.controlDragMapPoint.feature = feature;
+
+                        if ( feature.attributes.count > 1 ) return;
+                        // feature = feature.cluster[0];
+                        if ( feature.popup ) return;
+
+                        popupStopClosing(feature);
+
+                        if ( mapsArray.mySelfHero.mySelfPost[0] !== undefined ) {
+
+                            var __x = new Post({ post: mapsArray.mySelfHero.mySelfPost[0].post, author: mapsArray.mySelfHero.mySelfPost[0].author }).prepare();
+                            var postPreview = new PostSmallPreviewView({
+                                model:  __x, //  Model LentВ  transmit  here
+                                parent: $('feature_id_'+ feature.id)
+                            }).render();
+
+                            var laltPost = postPreview.$el[0].outerHTML;
+
+                            if( parseInt( mapsArray.mySelfHero.mySelfPost[0].author.id ) == parseInt( mapsArray.hoverHeroes ) ) {
+                                voidRightOffPopup();
+                                popupFramedCloudSelf( feature, laltPost, evt );
+                            } else {
+                                voidRightOffPopup();
+                            }
+
+                        } else {
+
+                            var __userId = parseInt( App.visitor.get('id') );
+                            $.post( zendBaseUrl + '/index/ajax-maps-is-no-post', { 'userId' : __userId, 'format' : 'json' }, function( data ) {
+
+                                var _laltPost = $.parseJSON(data.result).info.value;
+                                var key  = $.parseJSON(data.result).info.key;
+
+                                if( 'photo' == $.trim( key ) ) {
+                                    laltPost = photoTemplateModul( _laltPost );
+                                } else {
+                                    laltPost = _laltPost;
+                                }
+
+                                laltPost =  stringViewPupap($.parseJSON(data.result).info ); // VN1
+                                console.log($.parseJSON(data.result).info);
+
+                            if ( ( mapsArray.popup.triger.heroes == true  && mapsArray.popup.triger.popup == false ) ||
+                                 ( mapsArray.popup.triger.heroes == false && mapsArray.popup.triger.popup == true  ) ||
+                                 ( mapsArray.popup.triger.heroes == true  && mapsArray.popup.triger.popup == false )
+                            )  {
+                                    if ( ( parseInt($.parseJSON(data.result).id) == mapsArray.hoverHeroes ) ) {
+                                        voidRightOffPopup();
+                                        sleep(2);//mc
+                                        popupFramedCloudSelf(feature, laltPost, evt);
+                                    } else {
+                                        voidRightOffPopup();
+                                    }
+                                }
+
+                            });
+                        }
+                    },
+
+                    featureunselected: function ( evt ) {
+                        voidPopupDelClick();
+                        mapsArray.active = 0;
+
+                        mapsArray.popup.triger.heroes = false;
+                        var feature = evt.feature;
+                        if ( !feature.popup ) return;
+                        popupStartClosing(feature);
+                    }
+                }
+            });
+
+            var features = markerHero( map, mapsMySelfHeroLon, mapsMySelfHeroLat );
+
+            if ( App.visitor.get('id') !== undefined ) {
+                map.addLayer(vector);
+                vector.addFeatures(features);
+            }
+
+            $("#locationMe").click( function () {
+                setCenter(map);
+            });
+
+            $("#locationBgoToHome").click( function () {
+                mapsArray.mySelfHero.lon = mapsArray.mySelfHero.lonHome; //App.visitor.get('defaultLatLon').lon;
+                mapsArray.mySelfHero.lat = mapsArray.mySelfHero.latHome; //App.visitor.get('defaultLatLon').lat;
+
+                setCenter(map);
+
+                var point = setPoint(map);
+
+                mapsArray.mySelfHero.visitorHero[0].move( point );
+
+                saveHero();
+            });
+
+            $("#locationBack").click( function () {
+
+                if ( App.visitor.get('id') === undefined ) return;
+
+                if ( mapsArray.mySelfHero.story && mapsArray.mySelfHero.story.length ){
+
+                    var last = mapsArray.mySelfHero.story.pop();
+
+                    mapsArray.mySelfHero.lon = last[0];
+                    mapsArray.mySelfHero.lat = last[1];
+
+                    var point = setPoint(map);
+                    mapsArray.mySelfHero.visitorHero[0].move( point );
+                    setCenter(map);
+                    saveHero();
+
+                    addToByDefaultStory();
+                } else {
+                    setCenter(map);
+                }
+            });
+
+            return vector;
+        }
+    }
+</script>

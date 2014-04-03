@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <!-- <title>Valentin Badiul :: Login</title> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Valentin Badiul">
+        <meta name="author" content="Valentin Badiul">
+    <?php 
+        // echo $this->headMeta()->appendHttpEquiv('Content-Type', 'text/html; charset=utf-8'); 
+        // echo $this->headMeta()->appendName('description', 'Valentin');
+        // echo $this->headMeta()->appendName('copyright', '© 2014 valentin.in.ua ');
+        echo  $this->headTitle() ; 
+    ?>
+<meta name="description" content="Бадюл Валентин :: Valentin Badiul –  the creator of a universal means of communication for friends and classmates who can enjoy every day tens of millions of people." />
+
+    <meta property="og:title" content="Telegram – taking back our right to privacy">
+    <meta property="og:image" content="http://valentin.in.ua/assets/img/favicon.ico?1.1.0">
+    <meta property="og:site_name" content="Valentin Badiul">
+    <meta property="og:description" content="Бадюл Валентин">
+    <link rel="shortcut icon" href="http://valentin.in.ua/assets/img/favicon.ico?1.1.0" type="image/x-icon" />
+        <!-- CSS --> 
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+    <link rel='stylesheet' href='//valentin.in.ua/assets/css/google/family.css'>
+        <link rel="stylesheet" href="//valentin.in.ua/assets/css/reset.css">
+        <link rel="stylesheet" href="//valentin.in.ua/assets/css/supersized.css">
+        <link rel="stylesheet" href="//valentin.in.ua/assets/css/style.css">
+        <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+        <script src="//valentin.in.ua/assets/ie/js/html5.js"></script>         
+        <![endif]-->
+        <style type="text/css">
+            div.menu {
+                color:#000;
+                font-weight: 600;
+                text-align:left;
+                width: 100%;
+                height: 20px;
+                background-color:#ffffff;
+                border:2px solid #555555 ;
+                filter:alpha(opacity=50);
+                opacity:0.5;
+                position:absolute;
+                left:0px;
+                top:0px;
+            } 
+            .containerOpacity{
+                filter:alpha(opacity=85);
+                opacity:0.85;
+                color:#000;
+            } 
+            a {
+                cursor: pointer
+            }
+           
+        </style>
+        <script>
+            function routrer(url){
+                routrerFunction(url);
+            }
+        </script>
+    </head>
+        <body>
+            <script src="http://openlayers.org/api/OpenLayers.js"></script>
+            <div class="page-container">
+                <?php echo $this->layout()->content; ?>
+            </div>
+            <!-- Javascript -->
+            <script src="//valentin.in.ua/assets/js/jquery-1.8.2.min.js"></script>
+            <!-- jq -->
+            <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+            <script src="//code.jquery.com/jquery-1.9.1.js"></script>
+            <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+            <!-- jq -->
+            <script src="//valentin.in.ua/assets/js/supersized.3.2.7.min.js"></script>
+            <script src="//valentin.in.ua/assets/js/supersized-init.js"></script>
+            <script src="//valentin.in.ua/assets/js/scripts.js"></script>
+            <script>
+                /* $(function(){
+                      $("#submit").on("click",function(e){
+                          alert(e);
+                      });
+                  });
+		*/
+            </script> 
+            <!-- Latest compiled and minified JavaScript -->
+            <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+            <script>
+                function routrerFunction(url){
+                    if ( (url != '') && ( typeof url !='undefined') ){
+                        $.post('/main/index/'+url, {'json':'json'} , function(data){
+                             window.location.hash = url;
+                            $( "#id-page-container" ).html(data);
+                        });
+                    }
+                }
+
+                $(function(){
+                   var url = window.location.href.split('#')[1];
+                    if (url != '') {
+                        routrerFunction(url);
+                    } 
+                });
+
+                function innerPost(post) {
+                    $.post('/main/index/accessstatus', post , function(data) {
+                        console.log(post);
+                    });
+                } 
+                function dialog(uid , post) {
+                    /* alert(uid ,post); */
+                    window.open('/id?u='+uid+'&p='+post, 'window', 'window settings');
+                    return false;
+                }
+
+                $('#Terms').on('click',function(e){
+                    $("#TermsDialog").dialog({
+                        width: '800', /* overcomes width:'auto' and maxWidth bug */
+                        maxWidth: 600,
+                        height: '500',
+                        modal: true,
+                        fluid: true, /* new option */
+                        resizable: false
+                    });
+                });
+
+                function joinPost(post) {
+                    $.post('/index/registration', post , function(data) {
+                        console.log(post);
+                    });
+                }
+        </script>
+
+            <style type="text/css">
+                .ui-widget {
+                    font-family: Verdana,Arial,sans-serif;
+                    font-size: .8em;
+                }
+
+                .ui-widget-content {
+                    background: #F9F9F9;
+                    border: 1px solid #90d93f;
+                    color: #222222;
+                }
+
+                .ui-dialog {
+                    left: 0;
+                    outline: 0 none;
+                    padding: 0 !important;
+                    position: absolute;
+                    top: 0;
+                }
+
+                #success {
+                    padding: 0;
+                    margin: 0; 
+                }
+
+                .ui-dialog .ui-dialog-content {
+                    background: none repeat scroll 0 0 transparent;
+                    border: 0 none;
+                    overflow: auto;
+                    position: relative;
+                    padding: 0 !important;
+                }
+
+                .ui-widget-header {
+                    background: #b0de78;
+                    border: 0;
+                    color: #fff;
+                    font-weight: normal;
+                }
+
+                .ui-dialog .ui-dialog-titlebar {
+                    padding: 0.1em .5em;
+                    position: relative;
+                        font-size: 1em;
+                } 
+            </style> 
+            <div style="display:none">
+                <div id="TermsDialog" title="Basic terms">
+                    <p>Privacy</p>
+                    <p>Your privacy is very important to us. </p>
+                    <p>'Welcome to Valentin – the creator of a universal means of communication for friends and classmates who can enjoy every day tens of millions of people.'</p>
+                </div>
+            </div>
+    </body>
+</html>

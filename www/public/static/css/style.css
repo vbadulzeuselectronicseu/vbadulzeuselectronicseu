@@ -1,0 +1,40 @@
+body,h1,h2,h3,p{
+	margin:0px;
+	padding:0px; 
+}
+
+body{
+	color:#555555;
+	font-size:12px;
+	background:   #f0f0f0;
+	 font-family:Calibri, Helvetica, sans-serif;
+}
+
+
+p { color:#000000 }
+
+
+
+div#block {width:1008px; margin:0 auto; background-color:#0fffff}
+div#header {width:1008px; height:280px; background:  url(/public/static/img/photo_2153553_resize_slideshow.jpg)  #f0ffff}
+div#left_col {width:420px; height:716px; float:left ;  background-color:#ff0fff}
+div#right_col {width:560px; float:left; background-color:#fff0ff}
+div#footer_copyright {width:990px; height:17px; background-color:#ffff0f; clear:both ;text-align: right}
+div#footer {  background: url(/public/static/img/logo_map.png) #0ffff0; width:990px; height:82px;   clear:both}
+
+
+
+#menu {
+width:100%;
+margin:0 auto; 
+background-color:#C0C000;
+}
+ 
+#menu ul li a {
+font-size:22px;  
+    
+}
+/*Для первой буквы и первой строки абзаца:*/
+
+P:first-line { font-weight: bold }
+P:first-letter { font-size: 24px; color:red; float: left }
